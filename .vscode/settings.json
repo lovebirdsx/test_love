@@ -1,4 +1,11 @@
 {
-    "pixelbyte.love2d.runOnSave": true,
-    "pixelbyte.love2d.srcDir": "hello"
+    "filewatcher.commands": [
+        {
+            "match": "\\.lua",
+            "event": "onFileChange",
+            "isAsync": false,
+            "cmd": "cd /d ${workspaceRoot} && on_watch_succeed.bat"
+        }
+    ],
+    "filewatcher.autoClearConsole": true
 }

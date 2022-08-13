@@ -2,5 +2,5 @@
 
 ## 安装
 
-- <https://love2d.org/>
-- vscode 插件 `Love2D Support`
+- 安装love2d：<https://love2d.org/>
+- 安装extensions.json中推荐的插件

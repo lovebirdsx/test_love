@@ -1,5 +1,7 @@
 {
     "recommendations": [
-        "pixelbyte-studios.pixelbyte-love2d"
+        "pixelbyte-studios.pixelbyte-love2d",
+        "tangzx.emmylua",
+        "AppulateInc.filewatcher"
     ]
 }
