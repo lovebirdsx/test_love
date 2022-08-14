@@ -15,30 +15,34 @@ local MouseDragState = {
     Dragging = 2,
 }
 
-local screenScale = 1
+local screenScale = .5
 local screenRect = Box2.new(Vector2.new(0, 0), Vector2.new(love.graphics.getDimensions()))
-local viewportPos = Vector2.new(screenRect:getCenter())
+local viewportPos = Vector2.new()
 local worldToScreen = love.math.newTransform()
 local screenToWorld = love.math.newTransform()
 local mousePos = Vector2.new(0, 0)
-local mouseWheelMoved = Vector2.new(0, 0)
 local mousePressedTime = 0
 local mousePressedPos = Vector2.new(0, 0)
 local mousePressedWorldPos = Vector2.new(0, 0)
+local viewportPosWhileMousePressed = Vector2.new(0, 0)
 local mouseReleaseTime = 0
 local mouseReleasedPos = Vector2.new(0, 0)
-local mouseMoveDistanceFromPressed = 0
 local mouseDragState = MouseDragState.Idle
+local screenToWorldWhileMousePressed = love.math.newTransform()
 
 local world = World.new()
 
 local function updateTransform()
-    worldToScreen:setTransformation(viewportPos.x, viewportPos.y, 0, screenScale, screenScale, 0, 0, 0, 0)
+    local sw, sh = screenRect:getSize()
+    worldToScreen:setTransformation(
+        -viewportPos.x * screenScale,
+        -viewportPos.y * screenScale,
+        0,
+        screenScale, screenScale,
+        -sw / 2 / screenScale, -sh / 2 / screenScale,
+        0, 0
+    )
     screenToWorld = worldToScreen:inverse()
-end
-
-local function updateDragPos()
-    
 end
 
 ---@param pos Vector2 | nil
@@ -75,10 +79,7 @@ end
 
 ---@param pos Vector2
 local function onMouseButtonDrag(pos)
-    local mouseWorldPos = Vector2.new(screenToWorld:transformPoint(pos.x, pos.y))
-    local worldOffset = mouseWorldPos - mousePressedWorldPos
-    printf('worldOffset: %s', worldOffset)
-    viewportPos = viewportPos + worldOffset
+    viewportPos = viewportPosWhileMousePressed - Vector2.new(screenToWorldWhileMousePressed:transformPoint(pos.x, pos.y)) + mousePressedWorldPos
     updateTransform()
 end
 
@@ -127,9 +128,10 @@ end
 function love.mousepressed(x, y, button, istouch)
     if button == 1 then
         mousePressedTime = love.timer.getTime()
-        mouseMoveDistanceFromPressed = 0
         mousePressedPos:set(x, y)
         mousePressedWorldPos:set(screenToWorld:transformPoint(x, y))
+        viewportPosWhileMousePressed:set(viewportPos.x, viewportPos.y)
+        screenToWorldWhileMousePressed = screenToWorld:clone()
 
         if mouseDragState == MouseDragState.Idle then
             mouseDragState = MouseDragState.Prepare
@@ -156,18 +158,13 @@ end
 
 function love.mousemoved(x, y, dx, dy)
     mousePos:set(x, y)
-    mouseMoveDistanceFromPressed = mouseMoveDistanceFromPressed + math.sqrt(dx * dx, dy * dy)
 
     if mouseDragState == MouseDragState.Dragging then
         onMouseButtonDrag(mousePos)
     end
-
-    updateDragPos()
 end
 
 function love.wheelmoved(x, y)
-    mouseWheelMoved.x = x
-    mouseWheelMoved.y = y
     local s = screenScale + (y * screenScale * Config.ScaleRate)
     if s > Config.MaxScale then
         s = Config.MaxScale
@@ -184,18 +181,7 @@ function love.keypressed(key, scancode, isrepeat)
 end
 
 function love.draw()
-    if mouseDragState == MouseDragState.Dragging then
-        drawLine(mousePressedPos, mousePos, Color.Green)
-    end
-    
     love.graphics.replaceTransform(worldToScreen)
-    
-    if mouseDragState == MouseDragState.Dragging then
-        local pos1 = Vector2.new(screenToWorld:transformPoint(mousePressedPos.x, mousePressedPos.y))
-        local pos2 = Vector2.new(screenToWorld:transformPoint(mousePos.x, mousePos.y))
-        drawLine(pos1, pos2, Color.Red)
-    end
-
     world:draw()
     love.graphics.reset()
     ScreenDebug.draw()

@@ -11,6 +11,11 @@ function M:set(x, y)
     self.x, self.y = x, y
 end
 
+---@return number
+function M:magnitude()
+    return math.sqrt(self.x * self.x + self.y * self.y)
+end
+
 ---@return Vector2
 function M:clone()
     return M.new(self.x, self.y)
@@ -30,6 +35,11 @@ function M._sub(v1, v2)
     return M.new(v1.x - v2.x, v1.y - v2.y)
 end
 
+---@param v Vector2
+function M._unm(v)
+    return M.new(-v.x, -v.y)
+end
+
 ---@param v1 Vector2
 ---@param v2 Vector2
 function M._add(v1, v2)
@@ -47,6 +57,7 @@ M.__index = M
 M.__tostring = M.tostring
 M.__add = M._add
 M.__sub = M._sub
+M.__unm = M._unm
 
 ---@param x number
 ---@param y number
