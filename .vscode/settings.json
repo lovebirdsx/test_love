@@ -1,11 +1,17 @@
 {
     "filewatcher.commands": [
         {
-            "match": "\\.lua",
+            "match": "transform\\\\.*",
             "event": "onFileChange",
             "isAsync": false,
             "cmd": "cd /d ${workspaceRoot} && on_watch_succeed.bat"
+        },
+        {
+            "match": "test\\\\.*",
+            "event": "onFileChange",
+            "isAsync": false,
+            "cmd": "cd /d ${workspaceRoot} && test.bat"
         }
     ],
-    "filewatcher.autoClearConsole": true
+    "filewatcher.autoClearConsole": false
 }

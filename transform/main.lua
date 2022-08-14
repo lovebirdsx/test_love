@@ -85,7 +85,7 @@ end
 
 ---@param pos Vector2
 local function onMouseButtonDragEnd(pos)
-    print('onMouseButtonDragEnd', pos)
+    
 end
 
 local function updateDrawDebug()

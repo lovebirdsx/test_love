@@ -18,6 +18,9 @@ function M:draw()
     love.graphics.printf(self.pos:tostring(), self.pos.x - 100, self.pos.y + 10, 200, 'center')
 end
 
+function M:genSnapshot()
+end
+
 ---@return string
 function M:toString()
     return string.format('%s %s', self.name, self.pos)
