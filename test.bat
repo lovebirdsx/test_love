@@ -1,1 +1,1 @@
-start cmd /C "lua test\main.lua || pause"
+start cmd /C "lua test\test_main.lua || pause"

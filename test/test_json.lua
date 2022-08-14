@@ -8,5 +8,4 @@ function TestJson:test1()
     local s = json.encode(t1)
     local t2 = json.decode(s)
     lu.assertEquals(t1, t2)
-    lu.assertEquals(t1, t2)
 end

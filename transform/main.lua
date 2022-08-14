@@ -47,6 +47,16 @@ local function updateTransform()
     screenToWorld = worldToScreen:inverse()
 end
 
+---@param p Vector2
+local function screenPosToWorld(p)
+    return Vector2.new(screenToWorld:transformPoint(p.x, p.y))
+end
+
+---@param p Vector2
+local function worldPosToScreen(p)
+    return Vector2.new(worldToScreen:transformPoint(p.x, p.y))
+end
+
 ---@param pos Vector2 | nil
 ---@return Entity
 local function createEntity(pos)
@@ -197,7 +207,16 @@ function love.wheelmoved(x, y)
     elseif s < Config.MinScale then
         s = Config.MinScale
     end
+
+    local mouseWorldPos = screenPosToWorld(mousePos)
+
     screenScale = s
+    updateTransform()
+
+    -- 滚轮缩放时, 是以鼠标所在位置进行缩放
+    -- 鼠标所在位置和屏幕中心的位置保持不变
+    local mouseWorldPos2 = screenPosToWorld(mousePos)
+    viewportPos = viewportPos + (mouseWorldPos - mouseWorldPos2)
     updateTransform()
 end
 

@@ -25,9 +25,21 @@ function M:set(x, y)
     self.x, self.y = x, y
 end
 
+---@param n number
+function M:mul(n)
+    self.x = self.x * n
+    self.y = self.y * n
+end
+
 ---@return number
 function M:magnitude()
     return math.sqrt(self.x * self.x + self.y * self.y)
+end
+
+function M:normalize()
+    local d = self:magnitude()
+    self.x = self.x / d
+    self.y = self.y / d
 end
 
 ---@return Vector2

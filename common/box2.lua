@@ -34,7 +34,7 @@ function M:getCenter()
 end
 
 function M:getCenterV()
-    return Vector2.new(self:getCenterV())
+    return Vector2.new(self:getCenter())
 end
 
 ---@return string
