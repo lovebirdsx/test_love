@@ -1,6 +1,6 @@
 local Vector2 = require('common.vector2')
 
----@class Box2D
+---@class Box2
 local M = {}
 
 M.min = Vector2.new(0, 0)
@@ -9,6 +9,11 @@ M.max = Vector2.new(0, 0)
 ---@return number, number
 function M:getSize()
     return self.max.x - self.min.x, self.max.y - self.min.y
+end
+
+---@return Vector2
+function M:getSizeV()
+    return Vector2.new(self:getSize())
 end
 
 ---@param w number
@@ -28,6 +33,10 @@ function M:getCenter()
     return minX + (maxX - minX) / 2, minY + (maxY - minY) / 2
 end
 
+function M:getCenterV()
+    return Vector2.new(self:getCenterV())
+end
+
 ---@return string
 function M:toString()
     local sizeX, sizeY = self:getSize()
@@ -37,6 +46,7 @@ end
 
 ---@param min Vector2
 ---@param max Vector2
+---@return Box2
 function M.new(min, max)
     local t = {
         min = min or M.min,

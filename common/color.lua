@@ -1,14 +1,15 @@
 ---@class Color
 local M = {}
 
+function M:toString()
+    return string.format('(%g, %g, %g, %g)', self.r, self.g, self.b, self.a)
+end
+
 M.r = 1
 M.g = 1
 M.b = 1
 M.a = 1
-
-function M:toString()
-    return string.format('(%g, %g, %g, %g)', self.r, self.g, self.b, self.a)
-end
+M.__tostring = M.toString
 
 ---@return Color
 function M.new(r, g, b, a)

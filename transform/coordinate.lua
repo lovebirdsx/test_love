@@ -1,12 +1,12 @@
-local util = require('common.util')
+require('common.util')
 
 ---@class Coordinate
 local Coordinate = {px={x = 100, y = 0}, py={x = 0, y = 100}, color=util.GREEN}
 local center = {x=0, y=0}
 
 function Coordinate:draw()
-    util:drawLine(center, self.px, self.color)
-    util:drawLine(center, self.py, self.color)
+    drawLine(center, self.px, self.color)
+    drawLine(center, self.py, self.color)
 end
 
 ---@param t Coordinate
