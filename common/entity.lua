@@ -19,6 +19,22 @@ function M:draw()
 end
 
 function M:genSnapshot()
+    ---@type Entity
+    local s = {}
+    s.name = self.name
+    s.size = self.size
+    s.pos = self.pos:genSnapshot()
+    s.color = self.color:genSnapshot()
+
+    return s
+end
+
+---@param s Entity
+function M:applySnapshot(s)
+    self.name = s.name
+    self.size = s.size
+    self.pos:applySnapshot(s.pos)
+    self.color:applySnapshot(s.color)
 end
 
 ---@return string
@@ -37,6 +53,9 @@ function M.new(t)
         error('new entity without world')
         return nil
     end
+
+    t.pos = t.pos or Vector2.new()
+    t.color = t.color or Color.new(1, 1, 1, 1)
 
     setmetatable(t, {__index = M})
     return t

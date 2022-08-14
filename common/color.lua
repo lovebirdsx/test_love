@@ -5,6 +5,24 @@ function M:toString()
     return string.format('(%g, %g, %g, %g)', self.r, self.g, self.b, self.a)
 end
 
+function M:genSnapshot()
+    ---@type Color
+    local s = {}
+    s.r = self.r
+    s.g = self.g
+    s.b = self.b
+    s.a = self.a
+    return s
+end
+
+---@param s Color
+function M:applySnapshot(s)
+    self.r = s.r
+    self.g = s.g
+    self.b = s.b
+    self.a = s.a
+end
+
 M.r = 1
 M.g = 1
 M.b = 1

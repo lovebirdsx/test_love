@@ -1,5 +1,7 @@
 require('common.util')
 
+local json = require('common.json')
+
 local ScreenDebug = require('common.screen_debug')
 local Config = require('common.config')
 
@@ -104,16 +106,40 @@ local function updateMouse()
     end
 end
 
-function love.load()
-    for i = 1, 10 do
-        world:addEntity(createEntity())
+local function loadWorld()
+    local s = love.filesystem.read(Config.WorldFile)
+    if not s then return end
+
+    local worldSnapshot = json.decode(s)
+    world:applySnapshot(worldSnapshot)
+    printf('load world form %s succeed', Config.WorldFile)
+end
+
+local function saveWorld()
+    local worldSnapshot = world:genSnapshot()
+    local ok, err = love.filesystem.write(Config.WorldFile, json.encode(worldSnapshot))
+    if not ok then
+        error(string.format('save world to %s failed', Config.WorldFile))
+        return;
     end
 
+    printf('save world to %s succeed', Config.WorldFile)
+end
+
+function love.load()
+    loadWorld()
     updateTransform()
+end
+
+function love.quit()
+    saveWorld()
+	return false
 end
 
 local keyFunMap = {
     escape = function() love.event.quit(0) end,
+    s = function() saveWorld() end,
+    l = function() loadWorld() end,
 }
 
 function love.update(dt)

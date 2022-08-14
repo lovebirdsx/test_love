@@ -1,3 +1,6 @@
+local Entity = require('common.entity')
+local table = require('common.tableex')
+
 ---@class EntityWorld
 local M = {}
 
@@ -35,6 +38,31 @@ function M:toString()
     --     table.insert(strs, '\t' .. e:toString())
     -- end
     return table.concat(strs, '\n')
+end
+
+function M:genSnapshot()
+    ---@type EntityWorld
+    local s = {}
+    local entites = {}
+    for i = 1, #self.entities do
+        local e = self.entities[i]
+        table.insert(entites, e:genSnapshot())
+    end
+    s.entities = entites
+    s.entityId = self.entityId
+    return s
+end
+
+---@param s EntityWorld
+function M:applySnapshot(s)
+    local entities = {}
+    for i = 1, #s.entities do
+        local e = Entity.new({world = self})
+        e:applySnapshot(s.entities[i])
+        table.insert(entities, e)
+    end
+    self.entities = entities
+    self.entityId = s.entityId
 end
 
 function M:draw()

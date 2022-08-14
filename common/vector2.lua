@@ -5,6 +5,20 @@ function M:tostring()
     return string.format('(%g, %g)', self.x, self.y)
 end
 
+function M:genSnapshot()
+    ---@type Vector2
+    local s = {}
+    s.x = self.x
+    s.y = self.y
+    return s
+end
+
+---@param s Vector2
+function M:applySnapshot(s)
+    self.x = s.x
+    self.y = s.y
+end
+
 ---@param x number
 ---@param y number
 function M:set(x, y)
