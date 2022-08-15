@@ -17,20 +17,24 @@ local MouseDragState = {
     Dragging = 2,
 }
 
+local LeftButton = 1
+local RightButton = 2
+local MiddleButton = 3
+
 local screenScale = .5
 local screenRect = Box2.new(Vector2.new(0, 0), Vector2.new(love.graphics.getDimensions()))
 local viewportPos = Vector2.new()
 local worldToScreen = love.math.newTransform()
 local screenToWorld = love.math.newTransform()
 local mousePos = Vector2.new(0, 0)
-local mousePressedTime = 0
-local mousePressedPos = Vector2.new(0, 0)
-local mousePressedWorldPos = Vector2.new(0, 0)
-local viewportPosWhileMousePressed = Vector2.new(0, 0)
-local mouseReleaseTime = 0
-local mouseReleasedPos = Vector2.new(0, 0)
-local mouseDragState = MouseDragState.Idle
-local screenToWorldWhileMousePressed = love.math.newTransform()
+local mousePressed = {false, false, false} ---@type boolean[]
+local mousePressedTimes = {0, 0, 0} ---@type number[]
+local mousePressedPoses = {Vector2.new(), Vector2.new(), Vector2.new()} ---@type Vector2[]
+local mousePressedWorldPoses = {Vector2.new(), Vector2.new(), Vector2.new()} ---@type Vector2[]
+local viewportPosWhileMousePressed = {Vector2.new(), Vector2.new(), Vector2.new()} ---@type Vector2[]
+local mouseReleaseTimes = {0, 0, 0} ---@type number[]
+local mouseReleasedPoses = {Vector2.new(), Vector2.new(), Vector2.new()} ---@type Vector2[]
+local screenToWorldWhileMousePressed = {} ---@type Transform[]
 
 local world = World.new()
 
@@ -81,39 +85,11 @@ local function onMouseButtonDown(pos)
     world:addEntity(createEntity(Vector2.new(math.floor(px), math.floor(py))))
 end
 
----@type Vector2
-local dragStartWorldPos = Vector2.new()
-
----@param pos Vector2
-local function onMouseButtonDragStart(pos)
-    dragStartWorldPos = Vector2.new(screenToWorld:transformPoint(pos.x, pos.y))
-end
-
----@param pos Vector2
-local function onMouseButtonDrag(pos)
-    viewportPos = viewportPosWhileMousePressed - Vector2.new(screenToWorldWhileMousePressed:transformPoint(pos.x, pos.y)) + mousePressedWorldPos
-    updateTransform()
-end
-
----@param pos Vector2
-local function onMouseButtonDragEnd(pos)
-    
-end
-
 local function updateDrawDebug()
     ScreenDebug.reset()
-    ScreenDebug.printf('viewPortPos: %s DragStartWorldPos: %s', viewportPos, dragStartWorldPos)
+    ScreenDebug.printf('Fps: %g ViewPortPos: %s ', love.timer.getFPS(), viewportPos)
     ScreenDebug.printf('Mouse: %s Scale: %g', mousePos, screenScale)
     ScreenDebug.printf('World: %s', world)
-end
-
-local function updateMouse()
-    if mouseDragState == MouseDragState.Prepare then
-        if love.timer.getTime() - mousePressedTime > Config.DragDetectTime then
-            mouseDragState = MouseDragState.Dragging
-            onMouseButtonDragStart(mousePos)
-        end
-    end
 end
 
 local function loadWorld()
@@ -153,7 +129,6 @@ local keyFunMap = {
 }
 
 function love.update(dt)
-    updateMouse()
     updateDrawDebug()
 end
 
@@ -162,41 +137,41 @@ function love.resize(w, h)
 end
 
 function love.mousepressed(x, y, button, istouch)
-    if button == 1 then
-        mousePressedTime = love.timer.getTime()
-        mousePressedPos:set(x, y)
-        mousePressedWorldPos:set(screenToWorld:transformPoint(x, y))
-        viewportPosWhileMousePressed:set(viewportPos.x, viewportPos.y)
-        screenToWorldWhileMousePressed = screenToWorld:clone()
+    mousePressed[button] = true
+    mousePressedTimes[button] = love.timer.getTime()
+    mousePressedPoses[button]:set(x, y)
+    mousePressedWorldPoses[button]:set(screenToWorld:transformPoint(x, y))
+    viewportPosWhileMousePressed[button]:set(viewportPos.x, viewportPos.y)
+    screenToWorldWhileMousePressed[button] = screenToWorld:clone()
 
-        if mouseDragState == MouseDragState.Idle then
-            mouseDragState = MouseDragState.Prepare
-        end
+    if button == RightButton then
+        love.mouse.setCursor(love.mouse.getSystemCursor('hand'))
     end
 end
 
 function love.mousereleased(x, y, button)
-    if button == 1 then
-        mouseReleaseTime = love.timer.getTime()
-        mouseReleasedPos:set(x, y)
-        
-        if Vector2.distance(mousePressedPos, mouseReleasedPos) < 10  then
-            onMouseButtonDown(mouseReleasedPos)
-        end
+    mousePressed[button] = false
+    mouseReleaseTimes[button] = love.timer.getTime()
+    mouseReleasedPoses[button]:set(x, y)
 
-        if mouseDragState == MouseDragState.Dragging then
-            onMouseButtonDragEnd(mousePos)
+    if button == LeftButton then
+        if Vector2.distance(mousePressedPoses[button], mouseReleasedPoses[button]) < 10  then
+            onMouseButtonDown(mouseReleasedPoses[button])
         end
-
-        mouseDragState = MouseDragState.Idle
+    elseif button == RightButton then
+        love.mouse.setCursor(love.mouse.getSystemCursor('arrow'))
     end
 end
 
 function love.mousemoved(x, y, dx, dy)
     mousePos:set(x, y)
 
-    if mouseDragState == MouseDragState.Dragging then
-        onMouseButtonDrag(mousePos)
+    if mousePressed[RightButton] then
+        viewportPos =
+            viewportPosWhileMousePressed[RightButton]
+            - Vector2.new(screenToWorldWhileMousePressed[RightButton]:transformPoint(x, y))
+            + mousePressedWorldPoses[RightButton]
+        updateTransform()
     end
 end
 
