@@ -12,10 +12,19 @@ M.name = 'entity'
 M.world = nil
 
 function M:draw()
+    -- local c = self.color
+    -- love.graphics.setColor(c.r, c.g, c.b, c.a)
+    -- love.graphics.circle('line', self.pos.x, self.pos.y, self.size)
+    -- love.graphics.printf(self.pos:tostring(), self.pos.x - 100, self.pos.y + 10, 200, 'center')
+end
+
+---@param worldToScreen Transform
+function M:drawUi(worldToScreen)
     local c = self.color
     love.graphics.setColor(c.r, c.g, c.b, c.a)
-    love.graphics.circle('line', self.pos.x, self.pos.y, self.size)
-    love.graphics.printf(self.pos:tostring(), self.pos.x - 100, self.pos.y + 10, 200, 'center')
+    local x, y = worldToScreen:transformPoint(self.pos.x, self.pos.y)
+    love.graphics.circle('line', x, y, self.size)
+    love.graphics.printf(self.pos:tostring(), x - 100, y + 10, 200, 'center')
 end
 
 function M:genSnapshot()

@@ -72,6 +72,14 @@ function M:draw()
     end
 end
 
+---@param worldToScreen Transform
+function M:drawUi(worldToScreen)
+    for i = 1, #self.entities do
+        local e = self.entities[i]
+        e:drawUi(worldToScreen)
+    end
+end
+
 M.__index = M
 M.__tostring = M.toString
 

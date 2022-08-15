@@ -11,12 +11,6 @@ local World = require('common.world')
 local Entity = require('common.entity')
 local Color = require('common.color')
 
-local MouseDragState = {
-    Idle = 0,
-    Prepare = 1,
-    Dragging = 2,
-}
-
 local LeftButton = 1
 local RightButton = 2
 local MiddleButton = 3
@@ -214,6 +208,7 @@ function love.draw()
     love.graphics.replaceTransform(worldToScreen)
     world:draw()
     love.graphics.reset()
+    world:drawUi(worldToScreen)
     drawSelect()
     ScreenDebug.draw()
 end
