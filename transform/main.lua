@@ -15,7 +15,7 @@ local LeftButton = 1
 local RightButton = 2
 local MiddleButton = 3
 
-local screenScale = .5
+local screenScale = 1
 local screenRect = Box2.new(Vector2.new(0, 0), Vector2.new(love.graphics.getDimensions()))
 local viewportPos = Vector2.new()
 local worldToScreen = love.math.newTransform()
@@ -65,9 +65,11 @@ local function createEntity(pos)
         pos = Vector2.new(math.floor(x), math.floor(y))
     end
 
+    local id = world:genEntityId()
     local entity = Entity.new({
         world = world,
-        name = 'E' .. world:genEntityId(),
+        id = id,
+        name = 'E' .. id,
         color = Color.Green,
         pos = Vector2.new(pos.x, pos.y)
     })
@@ -127,6 +129,7 @@ local keyFunMap = {
     escape = function() love.event.quit(0) end,
     s = function() saveWorld() end,
     l = function() loadWorld() end,
+    v = function() world.verbose = not world.verbose end,
 }
 
 function love.update(dt)

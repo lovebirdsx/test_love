@@ -1,91 +1,130 @@
-local Entity = require('common.entity')
 local table = require('common.tableex')
+
+local Entity = require('common.entity')
+local Config = require('common.config')
+local WroldGrid = require('common.world_grid')
+local Box2 = require('common.box2')
+local Vector2 = require('common.vector2')
 
 ---@class EntityWorld
 local M = {}
 
----@type Entity[]
-M.entities = {}
-M.entityId = 1
-
 ---@param e Entity
 function M:addEntity(e)
     if not e then
-        error('Add empty entity')
+        error('Add nil entity')
         return;
     end
 
-    table.insert(self.entities, e)
+    local hash = Config.posToHash(e.pos.x, e.pos.y)
+    local grid = self._gridMap[hash]
+    if not grid then
+        local gx, gy = Config.posToGridIndex(e.pos.x, e.pos.y)
+        local minX = gx * Config.GridWidth
+        local minY = gy * Config.GridHeight
+        local min = Vector2.new(minX, minY)
+        local max = Vector2.new(minX + Config.GridWidth, minY + Config.GridHeight)
+        grid = WroldGrid.new(Box2.new(min, max))
+        self._gridMap[hash] = grid
+    end
+
+    grid:addEntity(e)
+    self._entityCount = self._entityCount + 1
 end
 
 ---@param e Entity
 function M:remEntity(e)
-    table.remove(self.entities, table.indexof(self.entities, e))
+    local hash = Config.posToHash(e.pos.x, e.pos.y)
+    local grid = self._gridMap[hash]
+    if not grid then
+        local gx, gy = Config.posToGridIndex(e.pos.x, e.pos.y)
+        error(string.format('[%s] no grid for (%g, %g)', e, gx, gy))
+    end
+
+    grid:remEntity(e)
+    self._entityCount = self._entityCount - 1
+end
+
+function M:clearAll()
+    self._gridMap = {}
+    self._entityCount = 0
 end
 
 ---@return number
 function M:genEntityId()
-    local result = self.entityId
-    self.entityId = self.entityId + 1
+    local result = self._entityId
+    self._entityId = self._entityId + 1
     return result;
 end
 
+---@param verbose boolean
 function M:toString()
     local strs = {}
-    table.insert(strs, 'Entity count ' .. #self.entities)
-    -- for i = 1, #self.entities do
-    --     local e = self.entities[i]
-    --     table.insert(strs, '\t' .. e:toString())
-    -- end
+    table.insert(strs, 'Entity count ' .. self._entityCount)
+    if self.verbose then
+        for _, grid in pairs(self._gridMap) do
+            table.insert(strs, grid:tostring('\t'))
+        end
+    end
+    
     return table.concat(strs, '\n')
 end
 
 function M:genSnapshot()
-    ---@type EntityWorld
-    local s = {}
-    local entites = {}
-    for i = 1, #self.entities do
-        local e = self.entities[i]
-        table.insert(entites, e:genSnapshot())
+    local entities = {}
+    for _, grid in pairs(self._gridMap) do
+        grid:foreachEntity(function (e) table.insert(entities, e) end)
     end
-    s.entities = entites
-    s.entityId = self.entityId
+
+    local s = {} ---@type EntityWorld
+    local entitesData = {} ---@type Entity []
+    for i = 1, #entities do
+        local e = entities[i]
+        table.insert(entitesData, e:genSnapshot())
+    end
+
+    s._entities = entitesData
+    s._entityId = self._entityId
+    s.verbose = self.verbose
     return s
 end
 
 ---@param s EntityWorld
 function M:applySnapshot(s)
-    local entities = {}
-    for i = 1, #s.entities do
+    self:clearAll()
+    for i = 1, #s._entities do
         local e = Entity.new({world = self})
-        e:applySnapshot(s.entities[i])
-        table.insert(entities, e)
+        e:applySnapshot(s._entities[i])
+        self:addEntity(e)
     end
-    self.entities = entities
-    self.entityId = s.entityId
+    self._entityId = s._entityId
+    self.verbose = s.verbose
 end
 
 function M:draw()
-    for i = 1, #self.entities do
-        local e = self.entities[i]
-        e:draw()
+    for _, grid in pairs(self._gridMap) do
+        grid:draw()
     end
 end
 
 ---@param worldToScreen Transform
 function M:drawUi(worldToScreen)
-    for i = 1, #self.entities do
-        local e = self.entities[i]
-        e:drawUi(worldToScreen)
+    for _, grid in pairs(self._gridMap) do
+        grid:drawUi(worldToScreen)
     end
 end
 
 M.__index = M
 M.__tostring = M.toString
 
----@return EntityWorld
 function M.new()
-    return setmetatable({}, M)
+    local t = {} ---@class EntityWorld
+    t._entityCount = 0
+    t._entityId = 1
+    t.verbose = false
+    t._gridMap = {} ---@type table<number, WorldGrid>
+    setmetatable(t, M)
+    return t
 end
 
 return M

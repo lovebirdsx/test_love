@@ -8,8 +8,8 @@ M.pos = Vector2.new(0, 0)
 M.size = 10
 M.color = Color.White
 M.name = 'entity'
----@type EntityWorld
-M.world = nil
+M.world = nil ---@type EntityWorld
+M.id = nil ---@type number
 
 function M:draw()
     -- local c = self.color
@@ -32,6 +32,7 @@ function M:genSnapshot()
     local s = {}
     s.name = self.name
     s.size = self.size
+    s.id = self.id
     s.pos = self.pos:genSnapshot()
     s.color = self.color:genSnapshot()
 
@@ -42,6 +43,7 @@ end
 function M:applySnapshot(s)
     self.name = s.name
     self.size = s.size
+    self.id = s.id
     self.pos:applySnapshot(s.pos)
     self.color:applySnapshot(s.color)
 end
@@ -50,6 +52,9 @@ end
 function M:toString()
     return string.format('%s %s', self.name, self.pos)
 end
+
+M.__index = M
+M.__tostring = M.toString
 
 ---@param t Entity
 function M.new(t)
@@ -66,7 +71,7 @@ function M.new(t)
     t.pos = t.pos or Vector2.new()
     t.color = t.color or Color.new(1, 1, 1, 1)
 
-    setmetatable(t, {__index = M})
+    setmetatable(t, M)
     return t
 end
 

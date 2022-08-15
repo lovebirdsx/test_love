@@ -44,6 +44,9 @@ function M:toString()
     return string.format('center = (%g, %g) size = (%g, %g)', centerX, centerY, sizeX, sizeY)
 end
 
+M.__index = M
+M.__tostring = M.toString
+
 ---@param min Vector2
 ---@param max Vector2
 ---@return Box2
@@ -52,7 +55,7 @@ function M.new(min, max)
         min = min or M.min,
         max = max or M.max,
     }
-    return setmetatable(t, {__index = M})
+    return setmetatable(t, M)
 end
 
 ---@param center Vector2

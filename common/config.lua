@@ -1,9 +1,27 @@
 local M = {
     MaxScale = 2, -- 屏幕的最大缩放
-    MinScale = 1 / 8, -- 屏幕的最小缩放
+    MinScale = 1 / 32, -- 屏幕的最小缩放
     ScaleRate = .25, -- 鼠标滚轮进行缩放时的比例参数
     WorldFile = 'World.json', -- 世界存储的文件位置
+    GridWidth = 5000, -- 地图划分Grid的宽
+    GridHeight = 5000, -- 地图划分Grid的高
+    MaxGridCol = 1024, -- 最大的地图格子数
 }
+
+---@param x number
+---@param y number
+---@return number, number
+function M.posToGridIndex(x, y)
+    return math.floor(x / M.GridWidth), math.floor(y / M.GridHeight)
+end
+
+---@param x number
+---@param y number
+---@return number, number
+function M.posToHash(x, y)
+    local gx, gy = M.posToGridIndex(x, y)
+    return gy * M.MaxGridCol + gx
+end
 
 -- 参考 https://love2d.org/wiki/Config_Files
 function M.configLove2d(t)
