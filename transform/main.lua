@@ -35,6 +35,7 @@ local viewportPosWhileMousePressed = {Vector2.new(), Vector2.new(), Vector2.new(
 local mouseReleaseTimes = {0, 0, 0} ---@type number[]
 local mouseReleasedPoses = {Vector2.new(), Vector2.new(), Vector2.new()} ---@type Vector2[]
 local screenToWorldWhileMousePressed = {} ---@type Transform[]
+local isSelecting = false
 
 local world = World.new()
 
@@ -112,6 +113,12 @@ local function saveWorld()
     printf('save world to %s succeed', Config.WorldFile)
 end
 
+local function drawSelect()
+    if not isSelecting then return end
+
+    drawRect(mousePressedPoses[LeftButton], mousePos, Color.Green)
+end
+
 function love.load()
     loadWorld()
     updateTransform()
@@ -158,6 +165,7 @@ function love.mousereleased(x, y, button)
         if Vector2.distance(mousePressedPoses[button], mouseReleasedPoses[button]) < 10  then
             onMouseButtonDown(mouseReleasedPoses[button])
         end
+        isSelecting = false
     elseif button == RightButton then
         love.mouse.setCursor(love.mouse.getSystemCursor('arrow'))
     end
@@ -172,6 +180,8 @@ function love.mousemoved(x, y, dx, dy)
             - Vector2.new(screenToWorldWhileMousePressed[RightButton]:transformPoint(x, y))
             + mousePressedWorldPoses[RightButton]
         updateTransform()
+    elseif mousePressed[LeftButton] then
+        isSelecting = true
     end
 end
 
@@ -204,5 +214,6 @@ function love.draw()
     love.graphics.replaceTransform(worldToScreen)
     world:draw()
     love.graphics.reset()
+    drawSelect()
     ScreenDebug.draw()
 end

@@ -2,7 +2,6 @@ local M = {
     MaxScale = 2, -- 屏幕的最大缩放
     MinScale = 1 / 8, -- 屏幕的最小缩放
     ScaleRate = .25, -- 鼠标滚轮进行缩放时的比例参数
-    DragDetectTime = .1, -- 鼠标按下后, 多久开始计算拖动的消息
     WorldFile = 'World.json', -- 世界存储的文件位置
 }
 
