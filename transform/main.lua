@@ -93,7 +93,7 @@ local function loadWorld()
     local s = love.filesystem.read(Config.WorldFile)
     if not s then return end
 
-    local worldSnapshot = json.decode(s)
+    local worldSnapshot = json.decode(s)    
     world:applySnapshot(worldSnapshot)
     printf('load world form %s succeed', Config.WorldFile)
 end
@@ -116,7 +116,10 @@ local function drawSelect()
 end
 
 function love.load()
-    loadWorld()
+    local ok, reason = pcall(loadWorld)
+    if not ok then
+        printf('load world from %s failed\n%s', Config.WorldFile, table.tostring(reason))
+    end
     updateTransform()
 end
 
